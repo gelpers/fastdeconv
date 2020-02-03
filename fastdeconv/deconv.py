@@ -37,10 +37,25 @@ def deconv(y: np.ndarray, k: np.ndarray, lam: float,
         Deconvolved image
     """
 
+    # validate inputs
+    y = np.array(y)
+    k = np.array(k)
+    if y.ndim != 2:
+        raise ValueError('image y must be 2-dimensional')
+    if k.ndim != 2:
+        raise ValueError('kernel k must be 2-dimensional')
+    if lam < 0:
+        raise ValueError('regularization parameter lam must be >= 0')
+    if beta <= 0:
+        raise ValueError('beta must be > 0')
+    if beta_rate <= 1:
+        raise ValueError('beta_rate must be > 1')
+
+    k = pad_to_odd(k)
+    k = k / np.sum(k)  # kernel should be normalized
+
     alpha = 2/3  # TODO: allow any value of alpha
     nomin1, denom1, denom2 = precompute_fft_terms(y, k)
-
-    k = k / np.sum(k)
     xr = y
 
     while beta < beta_max:
@@ -66,6 +81,16 @@ def pad_to_shape(a: np.ndarray, shape: tuple) -> np.ndarray:
     ny, nx = a.shape
     b[:ny, :nx] = a
     return b
+
+
+def pad_to_odd(k: np.ndarray) -> np.ndarray:
+    k_shape = list(k.shape)
+    if k_shape[0] % 2 == 0:
+        k_shape[0] += 1
+    if k_shape[1] % 2 == 0:
+        k_shape[1] += 1
+    k = pad_to_shape(k, k_shape)
+    return k
 
 
 def circ_diff_1(a: np.ndarray) -> np.ndarray:
