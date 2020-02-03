@@ -109,7 +109,7 @@ if __name__ == "__main__":
     x = lena()
 
     # Blur the original image
-    k = streak_kernel((27, 27))
+    k = streak_kernel((6, 26))
     y = convolve2d(x, k, mode='same', boundary='wrap')
     # Add Gaussian noise
     y += numpy.random.normal(scale=1e-3*np.median(y), size=y.shape)
@@ -119,6 +119,6 @@ if __name__ == "__main__":
     k /= np.sum(k)
 
     # Perform deconvolution to reconstruct the original image
-    lam = 3e5  # regularization parameter, tuned to maximize SNR
+    lam = 1e6  # regularization parameter, tuned to maximize SNR
     xr = deconv(y, k, lam, beta_max=256)
     plot_results(x, k, y, xr)
